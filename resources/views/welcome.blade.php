@@ -3,7 +3,7 @@
 @section('content')
 <main class="max-w-6xl mx-auto px-4">
     
-    {{-- 1. Main Highlighted Post--}}
+    {{-- 1. Main Highlight Post--}}
     @if($mainPost)
     <section class="mb-16 mt-10">
         <h2 class="text-sm font-semibold uppercase tracking-widest text-amber-600 mb-4">Latest Review</h2>
