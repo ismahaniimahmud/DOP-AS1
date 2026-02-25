@@ -3,16 +3,16 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Post extends Model
 {
-    /**
-     * The attributes that are mass assignable.
-     * Include 'location' as your mandatory custom field.
-     */
+    use HasFactory;
+
     protected $fillable = [
         'title', 
         'body', 
+        'image_url', 
         'meta_description',
         'location',
         'meta_author' 
