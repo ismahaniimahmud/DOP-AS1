@@ -41,17 +41,25 @@
         </div>
     </section>
     @endif
-{{-- 3 summary post --}}
+
+    {{-- 2. Recent Discoveries with link to older post--}}
     <section class="mb-20">
-        <h2 class="text-2xl font-bold mb-8 text-stone-800">Recent Discoveries</h2>
+        <div class="flex justify-between items-center mb-8">
+            <h2 class="text-2xl font-bold text-stone-800">Recent Discoveries</h2>
+            <a href="{{ route('posts.index') }}" class="text-amber-700 font-bold hover:underline flex items-center">
+                View More <span class="ml-1">&rarr;</span>
+            </a>
+        </div>
+
         <div class="grid md:grid-cols-3 gap-8">
-            @foreach($recentPosts as $post)
+            @forelse($recentPosts as $post)
                 <article class="bg-white p-6 rounded-2xl shadow-sm hover:shadow-lg transition border border-stone-50 flex flex-col">
                     
                     {{-- Image retrieval --}}
                     @if($post->image_url)
                         <img src="{{ asset($post->image_url) }}" 
-                             class="w-full h-40 object-cover rounded-xl mb-4 shadow-sm">
+                             class="w-full h-40 object-cover rounded-xl mb-4 shadow-sm"
+                             alt="{{ $post->title }}">
                     @endif
 
                     <p class="text-xs text-stone-400 mb-2">{{ $post->created_at->format('M d, Y') }}</p>
@@ -63,7 +71,9 @@
                         Read More <span class="ml-1">&rarr;</span>
                     </a>
                 </article>
-            @endforeach
+            @empty
+                <p class="text-stone-400 italic">No discoveries yet.</p>
+            @endforelse
         </div>
     </section>
 
