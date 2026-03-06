@@ -27,6 +27,12 @@
                 Published on {{ $post->created_at->format('F d, Y') }} by {{ $post->meta_author }}
             </p>
 
+            @if($post->category)
+                <a href="{{ route('categories.posts', $post->category->id) }}" class="inline-block text-xs font-bold uppercase tracking-widest text-amber-700 hover:underline mb-4">
+                    {{ $post->category->name }}
+                </a>
+            @endif
+
             {{-- Title --}}
             <h1 class="text-5xl font-extrabold text-stone-900 mb-6 leading-tight">
                 {{ $post->title }}
