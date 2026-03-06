@@ -16,13 +16,13 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <label class="block text-xs font-bold text-amber-800 uppercase tracking-widest mb-2">Title post</label>
-                    <input type="text" name="title" placeholder="e.g. Ri's Cafe" 
+                    <input type="text" name="title" value="{{ old('title') }}" placeholder="e.g. Ri's Cafe" 
                         class="w-full border-gray-200 rounded-xl shadow-sm focus:ring-amber-500 focus:border-amber-500 transition" required>
                 </div>
 
                 <div>
                     <label class="block text-xs font-bold text-amber-800 uppercase tracking-widest mb-2">Location</label>
-                    <input type="text" name="location" placeholder="e.g. One Riverside" 
+                    <input type="text" name="location" value="{{ old('location') }}" placeholder="e.g. One Riverside" 
                         class="w-full border-gray-200 rounded-xl shadow-sm focus:ring-amber-500 focus:border-amber-500 transition" required>
                 </div>
             </div>
@@ -30,7 +30,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <label class="block text-xs font-bold text-amber-800 uppercase tracking-widest mb-2">Author Name</label>
-                    <input type="text" name="meta_author" placeholder="Add your name.." 
+                    <input type="text" name="meta_author" value="{{ old('meta_author') }}" placeholder="Add your name.." 
                         class="w-full border-gray-200 rounded-xl shadow-sm focus:ring-amber-500 focus:border-amber-500 transition" required>
                 </div>
 
@@ -43,14 +43,26 @@
 
             <div>
                 <label class="block text-xs font-bold text-amber-800 uppercase tracking-widest mb-2">Short Summary</label>
-                <input type="text" name="meta_description" placeholder="A brief hook for your review..." 
+                <input type="text" name="meta_description" value="{{ old('meta_description') }}" placeholder="A brief hook for your review..." 
                     class="w-full border-gray-200 rounded-xl shadow-sm focus:ring-amber-500 focus:border-amber-500 transition" required>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-amber-800 uppercase tracking-widest mb-2">Category</label>
+                <select name="category_id" class="w-full border-gray-200 rounded-xl shadow-sm focus:ring-amber-500 focus:border-amber-500 transition" required>
+                    <option value="" disabled {{ old('category_id') ? '' : 'selected' }}>Select a category</option>
+                    @foreach($categories as $category)
+                        <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
+                            {{ $category->name }}
+                        </option>
+                    @endforeach
+                </select>
             </div>
 
             <div>
                 <label class="block text-xs font-bold text-amber-800 uppercase tracking-widest mb-2">Full Review</label>
                 <textarea name="body" rows="6" placeholder="Add your full review here..." 
-                    class="w-full border-gray-200 rounded-xl shadow-sm focus:ring-amber-500 focus:border-amber-500 transition" required></textarea>
+                    class="w-full border-gray-200 rounded-xl shadow-sm focus:ring-amber-500 focus:border-amber-500 transition" required>{{ old('body') }}</textarea>
             </div>
 
             <div class="flex items-center justify-end gap-4 pt-4 border-t border-gray-100">

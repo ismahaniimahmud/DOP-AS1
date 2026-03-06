@@ -49,6 +49,18 @@
             </div>
 
             <div>
+                <label class="block text-xs font-bold text-amber-800 uppercase tracking-widest mb-2">Category</label>
+                <select name="category_id" class="w-full border-gray-200 rounded-xl shadow-sm focus:ring-amber-500 focus:border-amber-500 transition" required>
+                    <option value="" disabled>Select a category</option>
+                    @foreach($categories as $category)
+                        <option value="{{ $category->id }}" {{ old('category_id', $post->category_id) == $category->id ? 'selected' : '' }}>
+                            {{ $category->name }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div>
                 <label class="block text-xs font-bold text-amber-800 uppercase tracking-widest mb-2">Full Review</label>
                 <textarea name="body" rows="6" 
                     class="w-full border-gray-200 rounded-xl shadow-sm focus:ring-amber-500 focus:border-amber-500 transition" required>{{ old('body', $post->body) }}</textarea>
