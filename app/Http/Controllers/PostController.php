@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use App\Models\Post;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -14,12 +15,17 @@ class PostController extends Controller
     public function index()
     {
         // Get the latest post for the big "Main" card
-        $mainPost = Post::latest()->first();
+        $mainPost = Post::with('category')->latest()->first();
 
         // Get the next 3 posts for the "Recent Discoveries" grid
-        $recentPosts = Post::latest()->skip(1)->take(3)->get();
+        $recentPosts = Post::with('category')->latest()->skip(1)->take(3)->get();
 
-        return view('welcome', compact('mainPost', 'recentPosts'));
+        $categories = Category::withCount('posts')
+            ->having('posts_count', '>', 0)
+            ->orderBy('name')
+            ->get();
+
+        return view('welcome', compact('mainPost', 'recentPosts', 'categories'));
     }
 
     /**
@@ -37,6 +43,8 @@ class PostController extends Controller
      */
     public function show(Post $post)
     {
+        $post->load('category');
+
         return view('posts.show', compact('post'));
     }
 
@@ -45,7 +53,9 @@ class PostController extends Controller
      */
     public function create()
     {
-        return view('posts.create');
+        $categories = Category::orderBy('name')->get();
+
+        return view('posts.create', compact('categories'));
     }
 
     /**
@@ -59,6 +69,7 @@ class PostController extends Controller
             'location' => 'required',
             'meta_description' => 'required',
             'meta_author' => 'required',
+            'category_id' => 'required|exists:categories,id',
             'image_file' => 'nullable|image|max:2048', 
         ]);
 
@@ -77,7 +88,9 @@ class PostController extends Controller
      */
     public function edit(Post $post)
     {
-        return view('posts.edit', compact('post'));
+        $categories = Category::orderBy('name')->get();
+
+        return view('posts.edit', compact('post', 'categories'));
     }
 
     /**
@@ -91,6 +104,7 @@ class PostController extends Controller
             'location' => 'required',
             'meta_description' => 'required',
             'meta_author' => 'required',
+            'category_id' => 'required|exists:categories,id',
             'image_file' => 'nullable|image|max:2048',
         ]);
 
@@ -123,7 +137,20 @@ class PostController extends Controller
     public function allPosts()
     {
     // Fetch all posts, paginated so the page isn't too long
-    $posts = Post::latest()->paginate(9); 
+    $posts = Post::with('category')->latest()->paginate(9); 
     return view('posts.index', compact('posts'));
+    }
+
+    public function postsByCategory(Category $category)
+    {
+        $posts = $category->posts()
+            ->with('category')
+            ->latest()
+            ->paginate(9);
+
+        return view('posts.index', [
+            'posts' => $posts,
+            'selectedCategory' => $category,
+        ]);
     }
 }
