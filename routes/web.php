@@ -1,8 +1,10 @@
 <?php
 
 use App\Http\Controllers\PostController;
+use App\Http\Controllers\CategoryController; // Added this
 use App\Http\Controllers\ProfileController;
 use App\Models\Post;
+use App\Models\Category; // Added this
 use Illuminate\Support\Facades\Route;
 
 // Public Routes
@@ -20,12 +22,20 @@ Route::get('/discoveries', [PostController::class, 'allPosts'])->name('posts.ind
 Route::middleware(['auth', 'verified'])->group(function () {
     
     Route::get('/dashboard', function () {
-        $posts = Post::latest()->get(); // Fetch all posts to show in the table
-        $totalPosts = $posts->count();   // Count them for the summary widget
-        return view('dashboard', compact('posts', 'totalPosts'));
+        $posts = Post::latest()->get(); 
+        $totalPosts = $posts->count();
+        
+        // Fetch categories with their post counts
+        $categories = Category::withCount('posts')->get();
+
+        
+        return view('dashboard', compact('posts', 'totalPosts', 'categories'));
     })->name('dashboard');
 
-    // CRUD Resource (handles Create, Store, Edit, Update, Destroy)
+    // Category CRUD 
+    Route::resource('categories', CategoryController::class)->only(['store', 'update', 'destroy']);
+    
+    // Post CRUD (Cleaned up duplicate entry)
     Route::resource('posts', PostController::class)->except(['index', 'show']);
     
     // Profile Routes
