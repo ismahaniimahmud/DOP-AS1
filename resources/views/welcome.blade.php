@@ -51,7 +51,7 @@
                 @endif
                 <h3 class="text-4xl font-bold mb-4 text-stone-900">{{ $mainPost->title }}</h3>
                 
-                <p class="text-stone-800 font-medium mb-3 italic">"{{ $mainPost->meta_description }}"</p>
+                
                 
                 <p class="text-stone-600 mb-6 leading-relaxed">
                     {{ Str::limit($mainPost->body, 200) }}
