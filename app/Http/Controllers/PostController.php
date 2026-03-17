@@ -10,16 +10,17 @@ use Illuminate\Support\Facades\Storage;
 class PostController extends Controller
 {
     /**
-     * Homepage: Displays the cafe reviews.
+     * Homepage: Displays the latest cafe discoveries.
      */
     public function index()
     {
-        // Get the latest post for the big "Main" card
+        // Get the latest post for the Featured card
         $mainPost = Post::with('category')->latest()->first();
 
-        // Get the next 3 posts for the "Recent Discoveries" grid
+        // Get the next 3 posts for the "Recent Discoveries" section
         $recentPosts = Post::with('category')->latest()->skip(1)->take(3)->get();
 
+        // Only show categories that actually have posts
         $categories = Category::withCount('posts')
             ->having('posts_count', '>', 0)
             ->orderBy('name')
@@ -29,13 +30,16 @@ class PostController extends Controller
     }
 
     /**
-     * Dashboard: Management view for admin.
+     * Dashboard: Management view for the admin.
      */
     public function dashboard()
     {
+        // Fetch all posts and categories with counts for the dashboard stats
         $posts = Post::latest()->get();
         $totalPosts = $posts->count();
-        return view('dashboard', compact('posts', 'totalPosts'));
+        $categories = Category::withCount('posts')->get();
+
+        return view('dashboard', compact('posts', 'totalPosts', 'categories'));
     }
 
     /**
@@ -59,28 +63,30 @@ class PostController extends Controller
     }
 
     /**
-     * Store new post with image upload.
+     * Store new post with image upload logic.
      */
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'body' => 'required',
-            'location' => 'required',
+            'title'            => 'required|string|max:255',
+            'body'             => 'required',
+            'location'         => 'required',
             'meta_description' => 'required',
-            'meta_author' => 'required',
-            'category_id' => 'required|exists:categories,id',
-            'image_file' => 'nullable|image|max:2048', 
+            'meta_author'      => 'required',
+            'category_id'      => 'required|exists:categories,id',
+            'image_file'       => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048', 
         ]);
 
         if ($request->hasFile('image_file')) {
+            // Save file to storage/app/public/posts
             $path = $request->file('image_file')->store('posts', 'public');
+            // Store the accessible public URL in the database
             $validated['image_url'] = '/storage/' . $path;
         }
 
         Post::create($validated);
 
-        return redirect()->route('dashboard')->with('success', 'Cafe hunt published!');
+        return redirect()->route('dashboard')->with('success', 'Cafe hunt published successfully!');
     }
 
     /**
@@ -94,25 +100,27 @@ class PostController extends Controller
     }
 
     /**
-     * Update existing post.
+     * Update existing post and handle image replacement.
      */
     public function update(Request $request, Post $post)
     {
         $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'body' => 'required',
-            'location' => 'required',
+            'title'            => 'required|string|max:255',
+            'body'             => 'required',
+            'location'         => 'required',
             'meta_description' => 'required',
-            'meta_author' => 'required',
-            'category_id' => 'required|exists:categories,id',
-            'image_file' => 'nullable|image|max:2048',
+            'meta_author'      => 'required',
+            'category_id'      => 'required|exists:categories,id',
+            'image_file'       => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
 
         if ($request->hasFile('image_file')) {
-            // Delete old image if it exists to save space
+            // Remove old image from storage if a new one is uploaded
             if ($post->image_url) {
-                Storage::disk('public')->delete(str_replace('/storage/', '', $post->image_url));
+                $oldPath = str_replace('/storage/', '', $post->image_url);
+                Storage::disk('public')->delete($oldPath);
             }
+            
             $path = $request->file('image_file')->store('posts', 'public');
             $validated['image_url'] = '/storage/' . $path;
         }
@@ -123,24 +131,32 @@ class PostController extends Controller
     }
 
     /**
-     * Delete post.
+     * Delete post and associated image.
      */
     public function destroy(Post $post)
     {
         if ($post->image_url) {
-            Storage::disk('public')->delete(str_replace('/storage/', '', $post->image_url));
+            $path = str_replace('/storage/', '', $post->image_url);
+            Storage::disk('public')->delete($path);
         }
+        
         $post->delete();
-        return redirect()->route('dashboard')->with('success', 'Post deleted.');
+        
+        return redirect()->route('dashboard')->with('success', 'Post deleted permanently.');
     }
 
+    /**
+     * All Discoveries: Paginated view for users.
+     */
     public function allPosts()
     {
-    // Fetch all posts, paginated so the page isn't too long
-    $posts = Post::with('category')->latest()->paginate(9); 
-    return view('posts.index', compact('posts'));
+        $posts = Post::with('category')->latest()->paginate(9); 
+        return view('posts.index', compact('posts'));
     }
 
+    /**
+     * Filter posts by specific category.
+     */
     public function postsByCategory(Category $category)
     {
         $posts = $category->posts()

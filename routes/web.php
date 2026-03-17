@@ -1,10 +1,10 @@
 <?php
 
 use App\Http\Controllers\PostController;
-use App\Http\Controllers\CategoryController; // Added this
+use App\Http\Controllers\CategoryController; 
 use App\Http\Controllers\ProfileController;
 use App\Models\Post;
-use App\Models\Category; // Added this
+use App\Models\Category; 
 use Illuminate\Support\Facades\Route;
 
 // Public Routes
@@ -18,7 +18,7 @@ Route::view('/about', 'about')->name('about');
 Route::view('/contact', 'contact')->name('contact');
 Route::get('/discoveries', [PostController::class, 'allPosts'])->name('posts.index');
 
-// Protected Admin Routes
+
 Route::middleware(['auth', 'verified'])->group(function () {
     
     Route::get('/dashboard', function () {
@@ -35,7 +35,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Category CRUD 
     Route::resource('categories', CategoryController::class)->only(['store', 'update', 'destroy']);
     
-    // Post CRUD (Cleaned up duplicate entry)
+    // Post CRUD
     Route::resource('posts', PostController::class)->except(['index', 'show']);
     
     // Profile Routes
